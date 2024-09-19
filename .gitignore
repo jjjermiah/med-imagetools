@@ -218,3 +218,8 @@ examples/data_test
 data/
 demo.py
 README_backup.md
+# pixi environments
+.pixi
+*.egg-info
+
+.old

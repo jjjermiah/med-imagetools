@@ -5,7 +5,7 @@ def parser():
     parser = ArgumentParser("imgtools Automatic Processing Pipeline.")
 
     # arguments
-    parser.add_argument("input_directory", type=str,
+    parser.add_argument("input_sdirectory", type=str,
                         help="Path to top-level directory of dataset.")
 
     parser.add_argument("output_directory", type=str,
