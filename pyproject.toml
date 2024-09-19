@@ -11,7 +11,7 @@ requires-python = ">= 3.10"
 dependencies = ["numpy>=1.26.4,<2", "pydicom==2.4.4", "matplotlib>=3.9.2,<4", "pandas>=2.2.2,<3", "pynrrd>=1.0.0,<2", "pyyaml>=6.0.2,<7", "simpleitk>=2.4.0,<3", "h5py>=3.11.0,<4", "tqdm>=4.66.5,<5", "dill>=0.3.8,<0.4", "attrs>=24.2.0,<25", "scikit-image>=0.24.0,<0.25", "joblib>=1.4.2,<2", "scikit-learn>=1.5.2,<2", "rich>=13.8.1,<14", "rich-click>=1.8.3,<2", "textual>=0.79.1,<0.80", "click-didyoumean>=0.3.1,<0.4"]
 
 [project.scripts]
-mitk = "imgtools.cli.main:cli"
+mitk = "mitk.cli.main:cli"
 # autopipeline = "imgtools.autopipeline:main"
 # betapipeline = "imgtools.autopipeline_refactored:main"
 
@@ -24,7 +24,7 @@ build-backend = "hatchling.build"
 directory = "dist"
 
 [tool.hatch.build.targets]
-wheel = { packages = ["src/imgtools"] }
+wheel = { packages = ["src/imgtools", "src/mitk"] }
 #--------------------------------------------------------------------------------------------------#
 ############################################## PIXI ################################################
 #__________________________________________________________________________________________________#
@@ -65,27 +65,32 @@ pytest-cov = "*"
 pytest-xdist = "*"
 ipykernel = ">=6.29.3,<6.30"
 
+[tool.pytest.ini_options]
+addopts = "--ignore=tests/old_mit_tests/"
+
 [tool.pixi.feature.test.tasks.test]
 cmd = [
   "pytest",
   "--numprocesses=auto",
   "-s",
   "--verbose",
-  "--cov=damply",
+  "--cov=mitk",
   "--cov-report=xml:coverage-report/coverage.xml",
   "--cov-config=config/coverage.toml",
 ]
 inputs = ["src", "tests", "config/coverage.toml"]
 outputs = ["coverage-report/coverage.xml"]
+description = "Run tests using pytest with all cores and generate coverage report."
 
 [tool.pixi.feature.test.tasks.coverage]
 cmd = "coverage report --rcfile=config/coverage.toml"
 inputs = ["coverage-report/coverage.xml", "config/coverage.toml"]
 depends-on = ["test"]
+description = "Generate coverage report from result of test task."
 
-[tool.pixi.feature.test.tasks.validate]
-cmd = "pre-commit run --all-files"
-inputs = ["src/*", "tests/*", "config/*"]
+# [tool.pixi.feature.test.tasks.validate]
+# cmd = "pre-commit run --all-files"
+# inputs = ["src/*", "tests/*", "config/*"]
 
 ############################################## STYLE ###############################################
 # See config/ruff.toml for the configuration

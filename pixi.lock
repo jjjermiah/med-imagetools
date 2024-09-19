@@ -4430,7 +4430,7 @@ packages:
   name: med-imagetools
   version: 2.0.0
   path: .
-  sha256: b53c57ae6f99085a9715e9777faef7c202783a9c40dd3cd1d24f77a62a9b2351
+  sha256: 14bea29839d4d32c486f566de26fb0ea78a494e6775a02038822194b27081928
   requires_dist:
   - numpy>=1.26.4,<2
   - pydicom==2.4.4

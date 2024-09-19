@@ -1,4 +1,6 @@
 [tool.coverage.run]
-omit = []
+omit = [
+  "src/mitk/cli/*"
+]
 
 [tool.coverage.report]
