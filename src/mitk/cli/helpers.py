@@ -1,5 +1,4 @@
 import rich_click as click
-
 from click_didyoumean import DYMGroup
 
 class AliasedGroup(click.RichGroup, DYMGroup):

@@ -1,5 +1,7 @@
-import rich_click as click
 from pathlib import Path
+
+import rich_click as click
+
 from .helpers import AliasedGroup
 
 __version__ = '0.1.0'

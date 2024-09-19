@@ -1,7 +1,6 @@
-import numpy as np
 from typing import Tuple
 
-import pytest
+import numpy as np
 
 
 # Assuming the bbox function is defined as above
@@ -11,10 +10,10 @@ def bbox(data: np.ndarray) -> Tuple[slice, slice, slice]:
     box that encloses all non-zero elements in the given mask array.
     """
     non_zero_coords = np.argwhere(data)
-    
+
     if non_zero_coords.size == 0:
         return (slice(0, 0), slice(0, 0), slice(0, 0))
-    
+
     x_min, y_min, z_min = non_zero_coords.min(axis=0)
     x_max, y_max, z_max = non_zero_coords.max(axis=0) + 1
 
