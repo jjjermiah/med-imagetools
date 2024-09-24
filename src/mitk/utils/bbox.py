@@ -2,7 +2,6 @@ from typing import Tuple
 
 import numpy as np
 
-
 # Assuming the bbox function is defined as above
 def bbox(data: np.ndarray) -> Tuple[slice, slice, slice]:
     """

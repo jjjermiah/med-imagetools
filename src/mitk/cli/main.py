@@ -1,65 +1,75 @@
 from pathlib import Path
+from typing import Generator
 
 import rich_click as click
+from rich_click import rich_config
 
 from .helpers import AliasedGroup
+from mitk.logging_config import setup_logger
+from loguru import logger
+from mitk.io.locators import find_dicoms as _find_dicoms
 
-__version__ = '0.1.0'
+__version__ = "0.1.0"
 
 
-click.rich_click.STYLE_OPTIONS_TABLE_BOX = 'SIMPLE'
+click.rich_click.STYLE_OPTIONS_TABLE_BOX = "SIMPLE"
 click.rich_click.STYLE_COMMANDS_TABLE_SHOW_LINES = True
 click.rich_click.STYLE_COMMANDS_TABLE_PAD_EDGE = True
-
-
+click.rich_click.STYLE_COMMANDS_TABLE_COLUMN_WIDTH_RATIO = (1, 5)
 
 click.rich_click.OPTION_GROUPS = {
-    'damply': [
+    "damply": [
         {
-            'name': 'Basic options',
-            'options': ['--help', '--version'],
+            "name": "Basic options",
+            "options": ["--help", "--version"],
         },
     ]
 }
 
 click.rich_click.COMMAND_GROUPS = {
-    'mitk': [
+    "mitk": [
         {
-            'name': 'Basic Commands',
-            'commands': ['autopipeline', 'dicomsort', 'index'],
+            "name": "Basic Commands",
+            "commands": ["autopipeline", "dicomsort", "index"],
         },
         {
-            'name': 'Conversion Commands',
-            'commands': ['dicom2nrrd', 'dicom2nifti', 'nifti2nrrd', 'nrrd2dicom', 'nrrd2nifti'],
-        }
+            "name": "Conversion Commands",
+            "commands": [
+                "dicom2nrrd",
+                "dicom2nifti",
+                "nifti2nrrd",
+                "nrrd2dicom",
+                "nrrd2nifti",
+            ],
+        },
     ]
 }
 
 
 help_config = click.RichHelpConfiguration(
     show_arguments=True,
-    option_groups={'damply': [{'name': 'Arguments', 'panel_styles': {'box': 'ASCII'}}]},
+    option_groups={"damply": [{"name": "Arguments", "panel_styles": {"box": "ASCII"}}]},
 )
+
 
 @click.group(
     cls=AliasedGroup,
-    name='mitk',
-    context_settings={'help_option_names': ['-h', '--help']},
+    name="mitk",
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
-@click.version_option(__version__, prog_name='mitk')
+@click.version_option(__version__, prog_name="mitk")
 def cli() -> None:
     """
-    A tool to interact with systems implementing the 
-    Data Management Plan (DMP) standard.
+    med-imagetools (mitk) is a tool for working with medical imaging data.
     
-    This tool is meant to allow sys-admins to easily query and audit the metadata of their
-    projects.
+    CLI tools because you deserve better than just "autopipeline"
     """
     pass
 
-@cli.command(context_settings={'help_option_names': ['-h', '--help']})
+
+@cli.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument(
-    'directory',
+    "directory",
     type=click.Path(
         exists=True,
         path_type=Path,
@@ -76,9 +86,9 @@ def index(directory: Path) -> None:
     pass
 
 
-@cli.command(context_settings={'help_option_names': ['-h', '--help']})
+@cli.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument(
-    'directory',
+    "directory",
     type=click.Path(
         exists=True,
         path_type=Path,
@@ -94,9 +104,10 @@ def dicomsort(directory: Path) -> None:
     """
     pass
 
-@cli.command(context_settings={'help_option_names': ['-h', '--help']})
+
+@cli.command(context_settings={"help_option_names": ["-h", "--help"]})
 @click.argument(
-    'directory',
+    "directory",
     type=click.Path(
         exists=True,
         path_type=Path,
@@ -108,7 +119,7 @@ def dicomsort(directory: Path) -> None:
 )
 def autopipeline(directory: Path) -> None:
     """
-    original autopipeline.
+    original autopipeline 🤢.
     """
     pass
 
@@ -120,12 +131,14 @@ def dicom2nrrd():
     """
     pass
 
+
 @cli.command()
 def dicom2nifti():
     """
     Convert DICOM files to NIFTI files.
     """
     pass
+
 
 # @cli.command()
 # def nifti2nrrd():
@@ -149,6 +162,34 @@ def dicom2nifti():
 #     pass
 
 
+@cli.command()
+@click.argument(
+    "directory",
+    type=click.Path(
+        exists=True,
+        path_type=Path,
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+    ),
+    default=Path().cwd(),
+)
+@click.option(
+    "--log-level",
+    type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]),
+    default="INFO",
+)
+def find_dicoms(directory: Path, log_level: str) -> None:
+    """
+    Find DICOM files in a directory.
+    """
+    setup_logger(level=log_level)
+    result: Generator[Path, None, None] = _find_dicoms(directory)
 
-if __name__ == '__main__':
+    # get length of results generator
+    length = len(list(result))
+    logger.info(f"Found {length} DICOM files.")
+
+
+if __name__ == "__main__":
     cli()
