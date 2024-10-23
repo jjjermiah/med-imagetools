@@ -2,6 +2,7 @@ from concurrent.futures import ProcessPoolExecutor
 import pydicom.misc
 from mitk.io.loaders import DICOMBase
 from mitk.io import find_dicoms
+from mitk.mitk import modality
 from dataclasses import dataclass, field
 from typing import Dict, List, Any, Optional, Tuple
 from pydicom import dcmread
@@ -259,7 +260,6 @@ class StructureSet(DICOMBase):
         if len(self.roi_names) > 0:
             yield "ROI Names", self.roi_names
 
-    
     __rich_repr__.angular = True
 
 
@@ -271,7 +271,7 @@ def process_dicom_file(file_path: Path) -> StructureSet:
         return StructureSet.from_rtstruct_path(file_path)
     except Exception as e:
         logger.error(f"Error processing file {file_path}: {e}")
-        return None
+        raise ValueError(f"Error processing file {file_path}: {e}")
 
 
 def is_rtstruct(p: Path) -> bool:
@@ -279,6 +279,7 @@ def is_rtstruct(p: Path) -> bool:
         dcmread(p, stop_before_pixels=True, specific_tags=["Modality"]).Modality
         == "RTSTRUCT"
     )
+    # return modality(p.as_posix()) == "RTSTRUCT"
 
 
 def get_dicom_files(dicom_dir: Path, progress: dict, task_id: int) -> List[Path]:
@@ -366,7 +367,7 @@ def main(dicom_dirs: List[Path], n_proc: int, verbosity: str):
                         visible=False,
                     )
                     futures.append(
-                        executor.submit(get_dicom_files, dicom_dir, _progress, task_id)
+                        executor.submit(get_dicom_files, dicom_dir, _progress, task_id)  # type: ignore
                     )
 
                 while (n_finished := sum([future.done() for future in futures])) < len(
@@ -402,34 +403,34 @@ def main(dicom_dirs: List[Path], n_proc: int, verbosity: str):
                         dicom_file_paths.extend(future.result())
         print(f"\nTime taken: {time.time() - start:.2f} seconds")
 
-        create_structuresets_task = progress_bar.add_task(
-            "Creating StructureSets...", total=len(dicom_file_paths)
-        )
-        futures = []  # keep track of the jobs
-        with ProcessPoolExecutor(max_workers=N_PROC) as executor:
-            for i, dicom_file_path in enumerate(dicom_file_paths):
-                task_id = progress_bar.add_task(
-                    f"task {i} : {dicom_file_path.name}",
-                    total=len(dicom_file_paths),
-                    visible=False,
-                )
-                futures.append(executor.submit(process_path, dicom_file_path))
+    #     create_structuresets_task = progress_bar.add_task(
+    #         "Creating StructureSets...", total=len(dicom_file_paths)
+    #     )
+    #     futures = []  # keep track of the jobs
+    #     with ProcessPoolExecutor(max_workers=N_PROC) as executor:
+    #         for i, dicom_file_path in enumerate(dicom_file_paths):
+    #             task_id = progress_bar.add_task(
+    #                 f"task {i} : {dicom_file_path.name}",
+    #                 total=len(dicom_file_paths),
+    #                 visible=False,
+    #             )
+    #             futures.append(executor.submit(process_path, dicom_file_path))
 
-            while (n_finished := sum([future.done() for future in futures])) < len(
-                futures
-            ):
-                progress_bar.update(
-                    create_structuresets_task, completed=n_finished, total=len(futures)
-                )
+    #         while (n_finished := sum([future.done() for future in futures])) < len(
+    #             futures
+    #         ):
+    #             progress_bar.update(
+    #                 create_structuresets_task, completed=n_finished, total=len(futures)
+    #             )
 
-            # Collect results
-            for future in futures:
-                structure_set_list.append(future.result())
+    #         # Collect results
+    #         for future in futures:
+    #             structure_set_list.append(future.result())
 
-    logger.info(f"\n\nProcessed {len(structure_set_list)} RTSTRUCT files.")
-    print(structure_set_list[0])
+    # logger.info(f"\n\nProcessed {len(structure_set_list)} RTSTRUCT files.")
+    # print(structure_set_list[0])
 
-    # print(f"Found {len(dicom_file_paths)} RTSTRUCT files.")
+    # # print(f"Found {len(dicom_file_paths)} RTSTRUCT files.")
 
     # # logger.info(f"\n\nProcessed {len(rtstruct_list)} RTSTRUCT files.")
     # # logger.info(f"Time taken: {time.time() - start:.2f} seconds")

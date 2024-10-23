@@ -57,13 +57,3 @@ def find_dicoms(
     except Exception as e:
         logger.error(f"Unexpected error walking through the directory '{root}': {e}")
         raise  # Re-raise the exception to avoid silent failures
-
-
-def find_niftis(
-    root: Union[str, Path],
-    recursive: bool = True,
-    yield_directories: bool = False,
-    filter_pattern: str = "*.nii.gz",
-) -> Generator[Path, None, None]:
-    """Find NIFTI file paths in the specified root directory file tree."""
-    raise NotImplementedError
